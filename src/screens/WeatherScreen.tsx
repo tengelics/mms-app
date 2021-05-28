@@ -63,15 +63,46 @@ export default class WeatherScreen extends Component {
         <View style={styles.hourlyItem} />
         <View style={styles.hourlyItem} />
       </View>
-      <View style={styles.forecastWeatherBox}>
-        <View style={styles.forecastWeatherItem} />
-        <View style={styles.forecastWeatherItem} />
-        <View style={styles.forecastWeatherItem} />
-        <View style={styles.forecastWeatherItem} />
+      {this.renderForecastBox()}
+    </>
+  );
+  private renderPrecipitation = () => (
+    <>
+      {this.renderPrecipitationImage()}
+      {this.renderForecastBox()}
+    </>
+  );
+  private renderForecastBox = () => (
+    <View style={styles.forecastWeatherBox}>
+      <View style={styles.forecastWeatherItem} />
+      <View style={styles.forecastWeatherItem} />
+      <View style={styles.forecastWeatherItem} />
+      <View style={styles.forecastWeatherItem} />
+    </View>
+  );
+  private renderPrecipitationImage = () => (
+    <>
+      <View
+        style={{height: 150, backgroundColor: 'black', marginHorizontal: -20}}
+      />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-evenly',
+        }}>
+        <View
+          style={{width: 50, height: 50, backgroundColor: 'blue', margin: 10}}
+        />
+        <View
+          style={{width: 150, height: 50, backgroundColor: 'blue', margin: 10}}
+        />
+        <View
+          style={{width: 50, height: 50, backgroundColor: 'blue', margin: 10}}
+        />
       </View>
     </>
   );
-  private renderPrecipitation = () => <></>;
 }
 
 const styles = StyleSheet.create({

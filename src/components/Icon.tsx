@@ -17,6 +17,7 @@ interface IconProps {
   mode: IconMode;
   size: number;
   color: string;
+  onPress?: () => void;
 }
 
 export default class Icon extends Component<IconProps> {
@@ -29,6 +30,7 @@ export default class Icon extends Component<IconProps> {
           height: this.props.size,
           backgroundColor: this.props.color,
         }}
+        onPress={this.props.onPress}
       />
     );
   }
