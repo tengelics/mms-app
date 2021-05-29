@@ -4,6 +4,9 @@ import ContentContainer from '../components/ContentContainer';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
 import {_COLORS} from '../resources/colors';
+import axios from 'axios';
+import Geolocation from '@react-native-community/geolocation';
+import Config from 'react-native-config';
 
 enum SelectedView {
   Forecast,
@@ -11,8 +14,49 @@ enum SelectedView {
 }
 
 export default class WeatherScreen extends Component {
+
+  getWeatherInfo = () => {
+    axios
+      .post(
+        `https://api.openweathermap.org/data/2.5/onecall?lat=${this.state.latitude}&lon=${this.state.longitude}&exclude=minutely,alerts&appid=${Config.OPENWEATHER_API_KEY}&units=metric`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        },
+      )
+      .then((res) => {
+        console.log('res.data: ', res.data)
+      })
+      .catch((err) => {
+        console.log('err: ', err);
+      });
+  };
+
+  componentDidMount () {
+    Geolocation.getCurrentPosition((info) => {
+      if (info) {
+        this.setState(
+          {
+            latitude: info.coords.latitude,
+            longitude: info.coords.longitude,
+          },
+          () => {
+            this.getWeatherInfo();
+          },
+        );
+      } else {
+        this.setState({initialLoadingMessage: 'Geolocation unsuccessful'});
+      }
+    });
+  }
+  
   state = {
     selectedView: SelectedView.Forecast,
+    latitude: 0,
+    longitude: 0
   };
 
   textModeHelper = (mode: SelectedView) => {
