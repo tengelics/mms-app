@@ -26,6 +26,7 @@ export const getGeoLocation = (): Promise<geoLocationResult | false> => {
 }
 
 export const getWeatherInfo = (latitude: number, longitude: number): Promise<object | false> => {
+  console.log('apikey: ', Config.OPENWEATHER_API_KEY)
     return new Promise((resolve)=> {
         axios
         .post(
@@ -50,7 +51,7 @@ export const getWeatherInfo = (latitude: number, longitude: number): Promise<obj
   export const dateTransformer = (timeInt: number) => {
     const momentDate = moment(new Date(timeInt*1000));
     const dayOfWeek = momentDate.format('dddd');
-    const dateShort = momentDate.format('MMM Do').replaceAll('.', '');
+    const dateShort = momentDate.format('MMM Do').replace(/./g, '');
     const dateLong = momentDate.format('LLL');
     const metHuAttr = momentDate.format('YYYYMMDD_HHmm');
     const time = momentDate.format('HH:mm')
