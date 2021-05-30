@@ -20,11 +20,13 @@ export default class ContentContainer extends Component<ContentContainerProps> {
         <ScrollView
           style={styles.mainContainer}
           contentContainerStyle={styles.mainContainerContent}
-          showsVerticalScrollIndicator={false}>
-          <RefreshControl
-            refreshing={this.props.refreshing}
-            onRefresh={this.props.onRefresh}
-          />
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.props.refreshing}
+              onRefresh={this.props.onRefresh}
+            />
+          }>
           <View style={styles.headerRow}>
             <CText mode={CTextMode.Header}>{this.props.title}</CText>
             <Icon
