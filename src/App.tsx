@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import NavigationManager from './navigation/NavigationManager';
 import {_COLORS} from './resources/colors';
 
@@ -12,7 +13,9 @@ class App extends Component {
           backgroundColor={styles.mainContainer.backgroundColor}
         />
         <View style={styles.mainContainer}>
-          <NavigationManager />
+          <SafeAreaView style={styles.mainContainer}>
+            <NavigationManager />
+          </SafeAreaView>
         </View>
       </>
     );
