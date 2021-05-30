@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {View, ScrollView, StyleSheet} from 'react-native';
+import {View, ScrollView, StyleSheet, RefreshControl} from 'react-native';
 import {_COLORS} from '../resources/colors';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
@@ -9,6 +9,8 @@ const borderRadius = 18;
 interface ContentContainerProps {
   title: string;
   children?: React.ReactNode;
+  refreshing: boolean;
+  onRefresh: () => void;
 }
 
 export default class ContentContainer extends Component<ContentContainerProps> {
@@ -18,6 +20,10 @@ export default class ContentContainer extends Component<ContentContainerProps> {
         style={styles.mainContainer}
         contentContainerStyle={styles.mainContainerContent}
         showsVerticalScrollIndicator={false}>
+        <RefreshControl
+          refreshing={this.props.refreshing}
+          onRefresh={this.props.onRefresh}
+        />
         <View style={styles.headerRow}>
           <CText mode={CTextMode.Header}>{this.props.title}</CText>
           <Icon mode={IconMode.Hamburger} size={40} color={_COLORS.lightText} />

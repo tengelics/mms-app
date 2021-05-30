@@ -55,7 +55,8 @@ function MyTabBar({state, descriptors, navigation}) {
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}
+            key={index}>
             <Icon
               mode={IconMode.News}
               size={30}
