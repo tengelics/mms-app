@@ -33,10 +33,9 @@ export default class CText extends Component<CTextProps> {
     return (
       <TouchableOpacity
         style={{flexDirection: 'column', ...this.props.style}}
-        activeOpacity={1}>
-        <Text
-          style={{...this.styleHelper(), ...this.props.fontStyle}}
-          onPress={this.props.onPress}>
+        activeOpacity={1}
+        onPress={this.props.onPress}>
+        <Text style={{...this.styleHelper(), ...this.props.fontStyle}}>
           {this.props.children}
         </Text>
         {this.props.mode === CTextMode.ActiveContentTab && (

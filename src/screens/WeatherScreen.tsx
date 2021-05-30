@@ -16,6 +16,7 @@ import {
   getWeatherInfo,
   dateTransformer,
 } from '../helpers/weatherHelper';
+import LinearGradient from 'react-native-linear-gradient';
 import moment from 'moment';
 import 'moment/locale/hu';
 moment.locale('hu');
@@ -129,8 +130,7 @@ export default class WeatherScreen extends Component {
   };
 
   render() {
-    console.log(dateTransformer(this.state.metHuAttrDate).metHuAttr);
-    //console.log(JSON.stringify(this.state, null, 2));
+    console.log(JSON.stringify(this.state, null, 2));
     return (
       <ContentContainer
         title={'Időjárás'}
@@ -182,10 +182,15 @@ export default class WeatherScreen extends Component {
               borderRadius: 65,
               justifyContent: 'center',
               alignItems: 'center',
+              ...shadow,
             }}>
             <CText
               style={{marginVertical: 5}}
-              fontStyle={{color: 'white', fontWeight: 'bold', fontSize: 28}}>
+              fontStyle={{
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: 28,
+              }}>
               {this.state.currentTemp}
             </CText>
           </View>
@@ -226,8 +231,16 @@ export default class WeatherScreen extends Component {
       <View style={styles.hourlyWeatherRow}>
         {this.state.hourlyForecast.map((hourly, index) => {
           return (
-            <View style={styles.hourlyItem} key={index}>
-              <View style={{marginBottom: 80}}>
+            <View style={{...styles.hourlyItem}} key={index}>
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: '#ffffff',
+                  width: '100%',
+                  alignItems: 'center',
+                  paddingTop: 10,
+                  paddingBottom: 20,
+                }}>
                 <CText>{hourly.time}</CText>
                 <Icon
                   mode={IconMode.Weather}
@@ -237,10 +250,22 @@ export default class WeatherScreen extends Component {
                   style={{alignSelf: 'center'}}
                 />
               </View>
-              <View>
-                <CText>{hourly.temp}</CText>
-                <CText>{hourly.pop}</CText>
-              </View>
+              <LinearGradient
+                style={{
+                  flex: 1,
+                  width: '100%',
+                  alignItems: 'center',
+                  paddingBottom: 10,
+                  paddingTop: 40,
+                }}
+                colors={['#ffffff', '#9DCD6C', '#60BE63']}>
+                <CText
+                  fontStyle={{color: 'white', fontWeight: 'bold'}}
+                  style={{borderBottomWidth: 1, borderBottomColor: 'white'}}>
+                  {hourly.temp}
+                </CText>
+                <CText fontStyle={{color: 'white'}}>{hourly.pop}</CText>
+              </LinearGradient>
             </View>
           );
         })}
@@ -255,29 +280,48 @@ export default class WeatherScreen extends Component {
     </>
   );
   private renderForecastBox = () => (
-    <View style={styles.forecastWeatherBox}>
+    <LinearGradient
+      style={styles.forecastWeatherBox}
+      colors={['#374472', '#222442']}>
       {this.state.dailyForecast.map((daily, index) => {
         return (
           <View style={styles.forecastWeatherItem} key={index}>
             <View>
-              <CText>{daily.dayOfWeek}</CText>
-              <CText>{daily.date}</CText>
+              <CText
+                fontStyle={{
+                  fontWeight: 'bold',
+                  textTransform: 'capitalize',
+                  marginBottom: 3,
+                }}>
+                {daily.dayOfWeek}
+              </CText>
+              <CText fontStyle={{textTransform: 'uppercase'}}>
+                {daily.date}
+              </CText>
             </View>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
               <Icon
                 mode={IconMode.Weather}
                 iconName={daily.icon}
                 size={20}
                 color={'#5FBB64'}
               />
-              <CText style={styles.dailyForecastData}>{daily.max}</CText>
-              <CText style={styles.dailyForecastData}>{daily.min}</CText>
-              <CText style={styles.dailyForecastData}>{daily.rain}</CText>
+              <CText style={{...styles.dailyForecastData}}>{daily.max}</CText>
+              <CText style={{...styles.dailyForecastData, color: '#EF8433'}}>
+                {daily.min}
+              </CText>
+              <CText style={{...styles.dailyForecastData, color: '#3188CB'}}>
+                {daily.rain}
+              </CText>
             </View>
           </View>
         );
       })}
-    </View>
+    </LinearGradient>
   );
   private renderPrecipitationImage = () => (
     <>
@@ -298,26 +342,48 @@ export default class WeatherScreen extends Component {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'space-evenly',
+          justifyContent: 'space-between',
+          paddingVertical: 15,
+          paddingHorizontal: 10,
         }}>
-        <Icon
-          mode={IconMode.Arrow}
-          size={40}
-          color={_COLORS.darkText}
-          onPress={this.metHuDateDecrease}
-          style={{margin: 10}}
-        />
+        <LinearGradient
+          colors={['#5FBC64', '#8CC75E']}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 50,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Icon
+            mode={IconMode.Arrow}
+            size={30}
+            color={_COLORS.containerBackground}
+            onPress={this.metHuDateDecrease}
+            style={{margin: 10}}
+          />
+        </LinearGradient>
         <View style={{margin: 10, alignItems: 'center'}}>
           <CText>{dateTransformer(this.state.metHuAttrDate).dateLong}</CText>
-          <CText>Dátum</CText>
+          <CText fontStyle={{fontWeight: 'bold'}}>Dátum</CText>
         </View>
-        <Icon
-          mode={IconMode.Arrow}
-          size={40}
-          color={_COLORS.darkText}
-          onPress={this.metHuDateIncrease}
-          containerStyle={{margin: 10, transform: [{rotateY: '180deg'}]}}
-        />
+        <LinearGradient
+          colors={['#5FBC64', '#8CC75E']}
+          style={{
+            width: 50,
+            height: 50,
+            borderRadius: 50,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <Icon
+            mode={IconMode.Arrow}
+            size={40}
+            color={_COLORS.containerBackground}
+            onPress={this.metHuDateIncrease}
+            containerStyle={{margin: 10, transform: [{rotateY: '180deg'}]}}
+          />
+        </LinearGradient>
       </View>
     </>
   );
@@ -364,10 +430,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'lightgray',
     marginHorizontal: 5,
     borderRadius: 8,
-    paddingVertical: 10,
     borderColor: _COLORS.containerBackground,
     borderWidth: 5,
     ...shadow,
@@ -383,6 +447,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
+    paddingVertical: 8,
     width: '90%',
     marginBottom: 15,
     backgroundColor: _COLORS.containerBackground,
@@ -390,5 +455,6 @@ const styles = StyleSheet.create({
   },
   dailyForecastData: {
     marginLeft: 7,
+    fontWeight: 'bold',
   },
 });

@@ -16,20 +16,26 @@ interface ContentContainerProps {
 export default class ContentContainer extends Component<ContentContainerProps> {
   render() {
     return (
-      <ScrollView
-        style={styles.mainContainer}
-        contentContainerStyle={styles.mainContainerContent}
-        showsVerticalScrollIndicator={false}>
-        <RefreshControl
-          refreshing={this.props.refreshing}
-          onRefresh={this.props.onRefresh}
-        />
-        <View style={styles.headerRow}>
-          <CText mode={CTextMode.Header}>{this.props.title}</CText>
-          <Icon mode={IconMode.Hamburger} size={25} color={_COLORS.lightText} />
-        </View>
-        <View style={styles.contentContainer}>{this.props.children}</View>
-      </ScrollView>
+      <>
+        <ScrollView
+          style={styles.mainContainer}
+          contentContainerStyle={styles.mainContainerContent}
+          showsVerticalScrollIndicator={false}>
+          <RefreshControl
+            refreshing={this.props.refreshing}
+            onRefresh={this.props.onRefresh}
+          />
+          <View style={styles.headerRow}>
+            <CText mode={CTextMode.Header}>{this.props.title}</CText>
+            <Icon
+              mode={IconMode.Hamburger}
+              size={25}
+              color={_COLORS.lightText}
+            />
+          </View>
+          <View style={styles.contentContainer}>{this.props.children}</View>
+        </ScrollView>
+      </>
     );
   }
 }

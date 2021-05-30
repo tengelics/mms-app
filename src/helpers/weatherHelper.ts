@@ -51,7 +51,7 @@ export const getWeatherInfo = (latitude: number, longitude: number): Promise<obj
   export const dateTransformer = (timeInt: number) => {
     const momentDate = moment(new Date(timeInt*1000));
     const dayOfWeek = momentDate.format('dddd');
-    const dateShort = momentDate.format('MMM Do').replace(/./g, '');
+    const dateShort = momentDate.format('MMM Do').replace('.', '').replace('.', '');
     const dateLong = momentDate.format('LLL');
     const metHuAttr = momentDate.format('YYYYMMDD_HHmm');
     const time = momentDate.format('HH:mm')
