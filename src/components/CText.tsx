@@ -24,6 +24,8 @@ export default class CText extends Component<CTextProps> {
         return {...styles.activeContentTabStyle, ...this.props.style};
       case CTextMode.InactiveContentTab:
         return {...styles.inactiveContentTabStyle, ...this.props.style};
+      default:
+        return {...this.props.style};
     }
   };
   render() {

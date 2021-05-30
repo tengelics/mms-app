@@ -26,7 +26,7 @@ export default class ContentContainer extends Component<ContentContainerProps> {
         />
         <View style={styles.headerRow}>
           <CText mode={CTextMode.Header}>{this.props.title}</CText>
-          <Icon mode={IconMode.Hamburger} size={40} color={_COLORS.lightText} />
+          <Icon mode={IconMode.Hamburger} size={25} color={_COLORS.lightText} />
         </View>
         <View style={styles.contentContainer}>{this.props.children}</View>
       </ScrollView>

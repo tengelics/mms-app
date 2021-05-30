@@ -9,6 +9,12 @@ import WeatherScreen from '../screens/WeatherScreen';
 import NewsScreen from '../screens/NewsScreen';
 import Icon, {IconMode} from '../components/Icon';
 const Tab = createBottomTabNavigator();
+const iconModes = [
+  IconMode.Produce,
+  IconMode.Currency,
+  IconMode.Weather,
+  IconMode.News,
+];
 
 function MyTabBar({state, descriptors, navigation}) {
   return (
@@ -58,7 +64,7 @@ function MyTabBar({state, descriptors, navigation}) {
             style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}
             key={index}>
             <Icon
-              mode={IconMode.News}
+              mode={iconModes[index]}
               size={30}
               color={isFocused ? '#41ba63' : '#848d93'}
               onPress={onPress}

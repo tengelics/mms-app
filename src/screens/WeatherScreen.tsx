@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Image, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+} from 'react-native';
 import ContentContainer from '../components/ContentContainer';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
@@ -37,7 +44,7 @@ export default class WeatherScreen extends Component {
               time: dateTransformer(item.dt).time,
               temp: `${Math.round(item.temp)}°`,
               pop: `${Math.round(item.pop)}%`,
-              icon: item.weather[0].main,
+              icon: item.weather[0].icon,
             });
             if (index >= 5) return true;
           });
@@ -49,7 +56,7 @@ export default class WeatherScreen extends Component {
               max: `${Math.round(item.temp.max)}°`,
               min: `${Math.round(item.temp.min)}°`,
               rain: `${Math.round(item.rain || 0)}mm`,
-              icon: item.weather[0].main,
+              icon: item.weather[0].icon,
             });
             if (index >= 3) return true;
           });
@@ -158,22 +165,43 @@ export default class WeatherScreen extends Component {
   private renderForecast = () => (
     <>
       <View style={styles.currentWeatherBox}>
-        <CText>{this.state.lastSynced}</CText>
-        <CText>{this.state.currentTemp}</CText>
-        <CText>{this.state.city}</CText>
-        <CText>Hőérzet</CText>
-        <CText>{this.state.currentFeelsLike}</CText>
-        <CText>Csapadék</CText>
-        <CText>{this.state.currentPrecipitation}</CText>
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}>
+          <CText style={{alignSelf: 'flex-start'}}>
+            {this.state.lastSynced}
+          </CText>
+          <CText style={{marginVertical: 20}}>{this.state.currentTemp}</CText>
+          <CText style={{marginVertical: 20}}>{this.state.city}</CText>
+        </View>
+        <View style={{flex: 1, justifyContent: 'center'}}>
+          <CText>Hőérzet</CText>
+          <CText>{this.state.currentFeelsLike}</CText>
+          <CText>Csapadék</CText>
+          <CText>{this.state.currentPrecipitation}</CText>
+        </View>
       </View>
       <View style={styles.hourlyWeatherRow}>
-        {this.state.hourlyForecast.map(hourly => {
+        {this.state.hourlyForecast.map((hourly, index) => {
           return (
-            <View style={styles.hourlyItem}>
-              <CText>{hourly.time}</CText>
-              <CText>{hourly.temp}</CText>
-              <CText>{hourly.pop}</CText>
-              <CText>{hourly.icon}</CText>
+            <View style={styles.hourlyItem} key={index}>
+              <View style={{marginBottom: 80}}>
+                <CText>{hourly.time}</CText>
+                <Icon
+                  mode={IconMode.Weather}
+                  iconName={hourly.icon}
+                  size={15}
+                  color={'black'}
+                  style={{alignSelf: 'center'}}
+                />
+              </View>
+              <View>
+                <CText>{hourly.temp}</CText>
+                <CText>{hourly.pop}</CText>
+              </View>
             </View>
           );
         })}
@@ -189,15 +217,24 @@ export default class WeatherScreen extends Component {
   );
   private renderForecastBox = () => (
     <View style={styles.forecastWeatherBox}>
-      {this.state.dailyForecast.map(daily => {
+      {this.state.dailyForecast.map((daily, index) => {
         return (
-          <View style={styles.forecastWeatherItem}>
-            <CText>{daily.dayOfWeek}</CText>
-            <CText>{daily.date}</CText>
-            <CText>{daily.max}</CText>
-            <CText>{daily.min}</CText>
-            <CText>{daily.rain}</CText>
-            <CText>{daily.icon}</CText>
+          <View style={styles.forecastWeatherItem} key={index}>
+            <View>
+              <CText>{daily.dayOfWeek}</CText>
+              <CText>{daily.date}</CText>
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Icon
+                mode={IconMode.Weather}
+                iconName={daily.icon}
+                size={15}
+                color={'black'}
+              />
+              <CText style={styles.dailyForecastData}>{daily.max}</CText>
+              <CText style={styles.dailyForecastData}>{daily.min}</CText>
+              <CText style={styles.dailyForecastData}>{daily.rain}</CText>
+            </View>
           </View>
         );
       })}
@@ -211,7 +248,11 @@ export default class WeatherScreen extends Component {
             dateTransformer(this.state.metHuAttrDate).metHuAttr
           }.png`,
         }}
-        style={{width: '100%', height: 300}}
+        style={{
+          width: Dimensions.get('screen').width,
+          height: 300,
+          alignSelf: 'center',
+        }}
         resizeMode="contain"
       />
       <View
@@ -220,17 +261,23 @@ export default class WeatherScreen extends Component {
           alignItems: 'center',
           justifyContent: 'space-evenly',
         }}>
-        <TouchableOpacity
-          style={{width: 50, height: 50, backgroundColor: 'blue', margin: 10}}
+        <Icon
+          mode={IconMode.Arrow}
+          size={40}
+          color={_COLORS.darkText}
           onPress={this.metHuDateDecrease}
+          style={{margin: 10}}
         />
-        <View
-          style={{width: 150, height: 50, backgroundColor: 'blue', margin: 10}}>
+        <View style={{margin: 10, alignItems: 'center'}}>
           <CText>{dateTransformer(this.state.metHuAttrDate).dateLong}</CText>
+          <CText>Dátum</CText>
         </View>
-        <TouchableOpacity
-          style={{width: 50, height: 50, backgroundColor: 'blue', margin: 10}}
+        <Icon
+          mode={IconMode.Arrow}
+          size={40}
+          color={_COLORS.darkText}
           onPress={this.metHuDateIncrease}
+          containerStyle={{margin: 10, transform: [{rotateY: '180deg'}]}}
         />
       </View>
     </>
@@ -249,9 +296,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   currentWeatherBox: {
+    flexDirection: 'row',
     backgroundColor: 'lightgray',
     height: 140,
     borderRadius: 15,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
   },
   hourlyWeatherRow: {
     flexDirection: 'row',
@@ -260,10 +310,12 @@ const styles = StyleSheet.create({
   },
   hourlyItem: {
     flex: 1,
-    height: 140,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: 'lightgray',
     marginHorizontal: 5,
     borderRadius: 8,
+    paddingVertical: 10,
   },
   forecastWeatherBox: {
     flexDirection: 'column',
@@ -274,10 +326,14 @@ const styles = StyleSheet.create({
   },
   forecastWeatherItem: {
     flexDirection: 'row',
-    height: 30,
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
     width: '90%',
     marginBottom: 15,
     backgroundColor: _COLORS.containerBackground,
     borderRadius: 5,
+  },
+  dailyForecastData: {
+    marginLeft: 7,
   },
 });
