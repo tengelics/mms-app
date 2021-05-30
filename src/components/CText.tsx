@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Text, StyleSheet} from 'react-native';
+import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {_COLORS} from '../resources/colors';
 
 export enum CTextMode {
@@ -12,6 +12,7 @@ interface CTextProps {
   children: string;
   mode?: CTextMode;
   style?: {};
+  fontStyle?: {};
   onPress?: () => void;
 }
 
@@ -19,20 +20,36 @@ export default class CText extends Component<CTextProps> {
   styleHelper = () => {
     switch (this.props.mode) {
       case CTextMode.Header:
-        return {...styles.headerStyle, ...this.props.style};
+        return {...styles.headerStyle};
       case CTextMode.ActiveContentTab:
-        return {...styles.activeContentTabStyle, ...this.props.style};
+        return {...styles.activeContentTabStyle};
       case CTextMode.InactiveContentTab:
-        return {...styles.inactiveContentTabStyle, ...this.props.style};
+        return {...styles.inactiveContentTabStyle};
       default:
         return {...this.props.style};
     }
   };
   render() {
     return (
-      <Text style={this.styleHelper()} onPress={this.props.onPress}>
-        {this.props.children}
-      </Text>
+      <TouchableOpacity
+        style={{flexDirection: 'column', ...this.props.style}}
+        activeOpacity={1}>
+        <Text
+          style={{...this.styleHelper(), ...this.props.fontStyle}}
+          onPress={this.props.onPress}>
+          {this.props.children}
+        </Text>
+        {this.props.mode === CTextMode.ActiveContentTab && (
+          <View
+            style={{borderBottomWidth: 3, borderBottomColor: 'rgb(97,193,114)'}}
+          />
+        )}
+        {this.props.mode === CTextMode.InactiveContentTab && (
+          <View
+            style={{borderBottomWidth: 3, borderBottomColor: 'transparent'}}
+          />
+        )}
+      </TouchableOpacity>
     );
   }
 }
@@ -46,10 +63,12 @@ const styles = StyleSheet.create({
   },
   activeContentTabStyle: {
     color: _COLORS.darkText,
-    padding: 5,
+    fontWeight: 'bold',
+    padding: 8,
   },
   inactiveContentTabStyle: {
     color: _COLORS.secondaryText,
-    padding: 5,
+    fontWeight: 'bold',
+    padding: 8,
   },
 });

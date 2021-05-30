@@ -174,14 +174,53 @@ export default class WeatherScreen extends Component {
           <CText style={{alignSelf: 'flex-start'}}>
             {this.state.lastSynced}
           </CText>
-          <CText style={{marginVertical: 20}}>{this.state.currentTemp}</CText>
-          <CText style={{marginVertical: 20}}>{this.state.city}</CText>
+          <View
+            style={{
+              backgroundColor: '#5FBB64',
+              width: 65,
+              height: 65,
+              borderRadius: 65,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <CText
+              style={{marginVertical: 5}}
+              fontStyle={{color: 'white', fontWeight: 'bold', fontSize: 28}}>
+              {this.state.currentTemp}
+            </CText>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <Icon mode={IconMode.Location} size={18} color={'#5FBB64'} />
+            <CText style={{marginVertical: 5}} fontStyle={{fontWeight: 'bold'}}>
+              {this.state.city}
+            </CText>
+          </View>
         </View>
-        <View style={{flex: 1, justifyContent: 'center'}}>
-          <CText>Hőérzet</CText>
-          <CText>{this.state.currentFeelsLike}</CText>
-          <CText>Csapadék</CText>
-          <CText>{this.state.currentPrecipitation}</CText>
+        <View
+          style={{
+            height: 100,
+            width: 1,
+            borderWidth: 1,
+            borderColor: '#ddd',
+            borderStyle: 'dashed',
+          }}
+        />
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            paddingLeft: 18,
+          }}>
+          <CText fontStyle={{color: '#9FA6AA', marginBottom: 2}}>Hőérzet</CText>
+          <CText fontStyle={{fontWeight: 'bold', marginBottom: 10}}>
+            {this.state.currentFeelsLike}
+          </CText>
+          <CText fontStyle={{color: '#9FA6AA', marginBottom: 2}}>
+            Csapadék
+          </CText>
+          <CText fontStyle={{fontWeight: 'bold'}}>
+            {this.state.currentPrecipitation}
+          </CText>
         </View>
       </View>
       <View style={styles.hourlyWeatherRow}>
@@ -193,8 +232,8 @@ export default class WeatherScreen extends Component {
                 <Icon
                   mode={IconMode.Weather}
                   iconName={hourly.icon}
-                  size={15}
-                  color={'black'}
+                  size={22}
+                  color={'#5FBB64'}
                   style={{alignSelf: 'center'}}
                 />
               </View>
@@ -228,8 +267,8 @@ export default class WeatherScreen extends Component {
               <Icon
                 mode={IconMode.Weather}
                 iconName={daily.icon}
-                size={15}
-                color={'black'}
+                size={20}
+                color={'#5FBB64'}
               />
               <CText style={styles.dailyForecastData}>{daily.max}</CText>
               <CText style={styles.dailyForecastData}>{daily.min}</CText>
@@ -284,12 +323,24 @@ export default class WeatherScreen extends Component {
   );
 }
 
+const shadow = {
+  shadowColor: '#adb5bd',
+  shadowOffset: {
+    width: 0,
+    height: 6,
+  },
+  shadowOpacity: 0.55,
+  shadowRadius: 8,
+};
+
 const styles = StyleSheet.create({
   tabRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginVertical: 15,
+    borderBottomColor: '#F7F9F8',
+    borderBottomWidth: 2,
   },
   tabGroup: {
     flexDirection: 'row',
@@ -297,11 +348,12 @@ const styles = StyleSheet.create({
   },
   currentWeatherBox: {
     flexDirection: 'row',
-    backgroundColor: 'lightgray',
-    height: 140,
-    borderRadius: 15,
+    alignItems: 'center',
+    backgroundColor: _COLORS.containerBackground,
+    borderRadius: 10,
     paddingHorizontal: 8,
     paddingVertical: 5,
+    ...shadow,
   },
   hourlyWeatherRow: {
     flexDirection: 'row',
@@ -316,6 +368,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
     borderRadius: 8,
     paddingVertical: 10,
+    borderColor: _COLORS.containerBackground,
+    borderWidth: 5,
+    ...shadow,
   },
   forecastWeatherBox: {
     flexDirection: 'column',
