@@ -10,6 +10,7 @@ import ContentContainer from '../components/ContentContainer';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
 import {_COLORS} from '../resources/colors';
+import {_DIMENSIONS} from '../resources/dimensions';
 import {
   getGeoLocation,
   getWeatherInfo,
@@ -17,10 +18,7 @@ import {
 } from '../helpers/weatherHelper';
 import LinearGradient from 'react-native-linear-gradient';
 import {shadow} from '../resources/styles';
-import {
-  IopenWeatherHourly,
-  IopenWeatherResponse,
-} from '../interfaces/apiInterfaces';
+import {IopenWeatherResponse} from '../interfaces/apiInterfaces';
 import {
   iWeatherState,
   iDailyForecast,
@@ -31,6 +29,8 @@ import 'moment/locale/hu';
 moment.locale('hu');
 
 const previousDay18h = moment().startOf('day').valueOf() / 1000 - 60 * 60 * 6;
+const _12h = (1000 * 60 * 60 * 12) / 1000;
+const _10d = 60 * 60 * 24 * 10;
 
 export enum SelectedView {
   Forecast,
@@ -38,7 +38,26 @@ export enum SelectedView {
 }
 
 export default class WeatherScreen extends Component {
-  loadContent = async () => {
+  state: iWeatherState = {
+    selectedView: SelectedView.Forecast,
+    city: '',
+    currentTemp: '',
+    currentFeelsLike: '',
+    currentPrecipitation: '',
+    hourlyForecast: [],
+    dailyForecast: [],
+    lastSynced: '',
+    metHuAttrDate: previousDay18h,
+    refreshing: false,
+    loading: true,
+  };
+
+  async componentDidMount() {
+    await this.loadContent();
+  }
+
+  //gets geolocation, then gets weather data from api
+  loadContent = async (): Promise<IopenWeatherResponse | void> => {
     await getGeoLocation().then(async result => {
       if (result) {
         await getWeatherInfo(result.latitude, result.longitude).then(result => {
@@ -49,7 +68,8 @@ export default class WeatherScreen extends Component {
     });
   };
 
-  setResponse = (result: IopenWeatherResponse) => {
+  //sets weather data in local state
+  setResponse = (result: IopenWeatherResponse): void => {
     const lastSynced = dateTransformer(result.current.dt).time;
     const city = result.timezone
       .substr(result.timezone.indexOf('/') + 1, result.timezone.length)
@@ -92,24 +112,7 @@ export default class WeatherScreen extends Component {
     });
   };
 
-  async componentDidMount() {
-    await this.loadContent();
-  }
-
-  state: iWeatherState = {
-    selectedView: SelectedView.Forecast,
-    city: '',
-    currentTemp: '',
-    currentFeelsLike: '',
-    currentPrecipitation: '',
-    hourlyForecast: [],
-    dailyForecast: [],
-    lastSynced: '',
-    metHuAttrDate: previousDay18h,
-    refreshing: false,
-    loading: true,
-  };
-
+  //tab navigation styling helper
   textModeHelper = (mode: SelectedView) => {
     if (this.state.selectedView === mode) {
       return CTextMode.ActiveContentTab;
@@ -118,28 +121,25 @@ export default class WeatherScreen extends Component {
     }
   };
 
+  //met.hu precipitation image attribute increase
   metHuDateIncrease = () => {
-    if (
-      this.state.metHuAttrDate + (1000 * 60 * 60 * 12) / 1000 <
-      moment().valueOf() / 1000
-    ) {
+    if (this.state.metHuAttrDate + _12h < moment().valueOf() / 1000) {
       this.setState({
-        metHuAttrDate: this.state.metHuAttrDate + (1000 * 60 * 60 * 12) / 1000,
+        metHuAttrDate: this.state.metHuAttrDate + _12h,
       });
     }
   };
 
+  //met.hu precipitation image attribute decrease
   metHuDateDecrease = () => {
-    if (
-      this.state.metHuAttrDate - (1000 * 60 * 60 * 12) / 1000 >
-      moment().valueOf() / 1000 - 60 * 60 * 24 * 10
-    ) {
+    if (this.state.metHuAttrDate - _12h > moment().valueOf() / 1000 - _10d) {
       this.setState({
-        metHuAttrDate: this.state.metHuAttrDate - (1000 * 60 * 60 * 12) / 1000,
+        metHuAttrDate: this.state.metHuAttrDate - _12h,
       });
     }
   };
 
+  //pull refresh method
   onRefresh = () => {
     this.setState({refreshing: true}, async () => {
       await this.loadContent();
@@ -147,7 +147,7 @@ export default class WeatherScreen extends Component {
   };
 
   render() {
-    console.log(JSON.stringify(this.state, null, 2));
+    //console.log(JSON.stringify(this.state, null, 2));
     return (
       <ContentContainer
         title={'Időjárás'}
@@ -199,7 +199,11 @@ export default class WeatherScreen extends Component {
           </CText>
         </View>
         <View style={{flexDirection: 'row'}}>
-          <Icon mode={IconMode.Location} size={18} color={'#5FBB64'} />
+          <Icon
+            mode={IconMode.Location}
+            size={18}
+            color={_COLORS.appBackground}
+          />
           <CText style={{marginVertical: 5}} fontStyle={{fontWeight: 'bold'}}>
             {this.state.city}
           </CText>
@@ -220,38 +224,35 @@ export default class WeatherScreen extends Component {
     </View>
   );
   private renderHourlyForecastBox = () => (
-    <>
-      <View style={styles.hourlyWeatherRow}>
-        {this.state.hourlyForecast.map((hourly, index) => {
-          return (
-            <View style={{...styles.hourlyBarContainer}} key={index}>
-              <View style={styles.hourlyBarTop}>
-                <CText>{hourly.time}</CText>
-                <Icon
-                  mode={IconMode.Weather}
-                  iconName={hourly.icon}
-                  size={22}
-                  color={'#5FBB64'}
-                  style={{alignSelf: 'center'}}
-                />
-              </View>
-              <LinearGradient
-                style={styles.hourlyBarBottom}
-                colors={['#ffffff', '#9DCD6C', '#60BE63']}>
-                <CText
-                  fontStyle={{color: 'white', fontWeight: 'bold'}}
-                  style={{borderBottomWidth: 1, borderBottomColor: 'white'}}>
-                  {hourly.temp}
-                </CText>
-                <CText fontStyle={{color: 'white'}}>{hourly.pop}</CText>
-              </LinearGradient>
+    <View style={styles.hourlyWeatherRow}>
+      {this.state.hourlyForecast.map((hourly, index) => {
+        return (
+          <View style={{...styles.hourlyBarContainer}} key={index}>
+            <View style={styles.hourlyBarTop}>
+              <CText>{hourly.time}</CText>
+              <Icon
+                mode={IconMode.Weather}
+                iconName={hourly.icon}
+                size={22}
+                color={_COLORS.appBackground}
+                style={{alignSelf: 'center'}}
+              />
             </View>
-          );
-        })}
-      </View>
-    </>
+            <LinearGradient
+              style={styles.hourlyBarBottom}
+              colors={['#ffffff', '#9DCD6C', '#60BE63']}>
+              <CText
+                fontStyle={{color: 'white', fontWeight: 'bold'}}
+                style={{borderBottomWidth: 1, borderBottomColor: 'white'}}>
+                {hourly.temp}
+              </CText>
+              <CText fontStyle={{color: 'white'}}>{hourly.pop}</CText>
+            </LinearGradient>
+          </View>
+        );
+      })}
+    </View>
   );
-  private renderPrecipitationBox = () => <>{this.renderPrecipitationImage()}</>;
   private renderDailyForecastBox = () => (
     <LinearGradient
       style={styles.dailyForecastBox}
@@ -272,17 +273,23 @@ export default class WeatherScreen extends Component {
                 mode={IconMode.Weather}
                 iconName={daily.icon}
                 size={20}
-                color={'#5FBB64'}
+                color={_COLORS.appBackground}
               />
               <CText fontStyle={{...styles.dailyForecastData}}>
                 {daily.rain}
               </CText>
               <CText
-                fontStyle={{...styles.dailyForecastData, color: '#EF8433'}}>
+                fontStyle={{
+                  ...styles.dailyForecastData,
+                  color: _COLORS.dailyMaxTemp,
+                }}>
                 {daily.max}
               </CText>
               <CText
-                fontStyle={{...styles.dailyForecastData, color: '#3188CB'}}>
+                fontStyle={{
+                  ...styles.dailyForecastData,
+                  color: _COLORS.dailyMinTemp,
+                }}>
                 {daily.min}
               </CText>
             </View>
@@ -291,7 +298,7 @@ export default class WeatherScreen extends Component {
       })}
     </LinearGradient>
   );
-  private renderPrecipitationImage = () => (
+  private renderPrecipitationBox = () => (
     <>
       <Image
         source={{
@@ -351,8 +358,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginVertical: 15,
-    borderBottomColor: '#F7F9F8',
+    marginVertical: _DIMENSIONS.tabRowVerticalMargin,
+    borderBottomColor: _COLORS.tabSeparatorBorder,
     borderBottomWidth: 2,
   },
   tabGroup: {
@@ -374,7 +381,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   currentTempCircle: {
-    backgroundColor: '#5FBB64',
+    backgroundColor: _COLORS.appBackground,
     width: 65,
     height: 65,
     borderRadius: 65,
@@ -400,7 +407,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingLeft: 18,
   },
-  currentWeatherSecondaryText: {color: '#9FA6AA', marginBottom: 2},
+  currentWeatherSecondaryText: {
+    color: _COLORS.currentWeatherSecondaryText,
+    marginBottom: 2,
+  },
   currentWeatherPrimaryText: {fontWeight: 'bold'},
   hourlyWeatherRow: {
     flexDirection: 'row',
@@ -433,11 +443,10 @@ const styles = StyleSheet.create({
     paddingTop: 40,
   },
   dailyForecastBox: {
-    flexDirection: 'column',
     backgroundColor: 'darkblue',
     alignItems: 'center',
     paddingVertical: 15,
-    marginHorizontal: -20,
+    marginHorizontal: -_DIMENSIONS.contentHorizontalPadding,
   },
   dailyForecastItem: {
     flexDirection: 'row',

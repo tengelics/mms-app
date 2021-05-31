@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {_COLORS} from '../resources/colors';
+import {_DIMENSIONS} from '../resources/dimensions';
 
 export enum CTextMode {
   Header,
@@ -17,6 +18,7 @@ interface CTextProps {
 }
 
 export default class CText extends Component<CTextProps> {
+  //style properties based on component mode
   styleHelper = () => {
     switch (this.props.mode) {
       case CTextMode.Header:
@@ -27,10 +29,11 @@ export default class CText extends Component<CTextProps> {
         return {...styles.inactiveContentTabStyle};
     }
   };
+
   render() {
     return (
       <TouchableOpacity
-        style={{flexDirection: 'column', ...this.props.style}}
+        style={{...this.props.style}}
         activeOpacity={1}
         onPress={this.props.onPress}>
         <Text style={{...this.styleHelper(), ...this.props.fontStyle}}>
@@ -38,7 +41,10 @@ export default class CText extends Component<CTextProps> {
         </Text>
         {this.props.mode === CTextMode.ActiveContentTab && (
           <View
-            style={{borderBottomWidth: 3, borderBottomColor: 'rgb(97,193,114)'}}
+            style={{
+              borderBottomWidth: 3,
+              borderBottomColor: _COLORS.tabUnderlineColor,
+            }}
           />
         )}
         {this.props.mode === CTextMode.InactiveContentTab && (
@@ -56,7 +62,7 @@ const styles = StyleSheet.create({
     color: _COLORS.lightText,
     textTransform: 'uppercase',
     letterSpacing: 2,
-    fontSize: 18,
+    fontSize: _DIMENSIONS.headerText,
   },
   activeContentTabStyle: {
     color: _COLORS.darkText,

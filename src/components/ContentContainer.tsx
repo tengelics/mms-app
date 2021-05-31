@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import {View, ScrollView, StyleSheet, RefreshControl} from 'react-native';
 import {_COLORS} from '../resources/colors';
+import {_DIMENSIONS} from '../resources/dimensions';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
 import {shadow} from '../resources/styles';
-
-const borderRadius = 18;
 
 interface ContentContainerProps {
   title: string;
@@ -38,7 +37,11 @@ export default class ContentContainer extends Component<ContentContainerProps> {
   private renderHeader = () => (
     <View style={styles.headerRow}>
       <CText mode={CTextMode.Header}>{this.props.title}</CText>
-      <Icon mode={IconMode.Hamburger} size={25} color={_COLORS.lightText} />
+      <Icon
+        mode={IconMode.Hamburger}
+        size={_DIMENSIONS.headerMenuIcon}
+        color={_COLORS.lightText}
+      />
     </View>
   );
   private renderContent = () => (
@@ -54,20 +57,19 @@ const styles = StyleSheet.create({
   mainContainerContent: {
     minHeight: '100%',
   },
-
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginHorizontal: 15,
-    marginVertical: 30,
+    marginVertical: _DIMENSIONS.headerVerticalMargin,
   },
   contentContainer: {
     flex: 1,
     backgroundColor: _COLORS.containerBackground,
-    borderTopLeftRadius: borderRadius,
-    borderTopRightRadius: borderRadius,
-    paddingHorizontal: 18,
+    borderTopLeftRadius: _DIMENSIONS.contentBorderRadius,
+    borderTopRightRadius: _DIMENSIONS.contentBorderRadius,
+    paddingHorizontal: _DIMENSIONS.contentHorizontalPadding,
     ...shadow,
   },
 });

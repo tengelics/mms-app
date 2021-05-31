@@ -74,10 +74,17 @@ function MyTabBar({state, descriptors, navigation}) {
             <Icon
               mode={iconModes[index]}
               size={30}
-              color={isFocused ? '#41ba63' : '#848d93'}
+              color={
+                isFocused ? _COLORS.activeNavColor : _COLORS.inactiveNavColor
+              }
               onPress={onPress}
             />
-            <Text style={{color: isFocused ? '#41ba63' : '#848d93'}}>
+            <Text
+              style={{
+                color: isFocused
+                  ? _COLORS.activeNavColor
+                  : _COLORS.inactiveNavColor,
+              }}>
               {label}
             </Text>
           </TouchableOpacity>

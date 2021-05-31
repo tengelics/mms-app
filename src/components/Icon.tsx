@@ -55,6 +55,7 @@ interface IconProps {
 export default class Icon extends Component<IconProps> {
   IconName = OWM_01d;
 
+  //chooses betweeen shown svg icons based on component properties
   iconSwitch = () => {
     if (this.props.mode === IconMode.Weather) {
       switch (this.props.iconName) {
@@ -135,7 +136,7 @@ export default class Icon extends Component<IconProps> {
     return (
       <TouchableOpacity
         onPress={this.props.onPress}
-        style={{...styles.icon, ...this.props.containerStyle}}>
+        style={{...styles.iconContainer, ...this.props.containerStyle}}>
         <this.IconName
           width={this.props.size}
           height={this.props.size}
@@ -148,10 +149,10 @@ export default class Icon extends Component<IconProps> {
 }
 
 const styles = StyleSheet.create({
-  icon: {
+  iconContainer: {
     padding: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconContainer: {},
+  icon: {},
 });
