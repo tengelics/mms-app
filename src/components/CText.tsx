@@ -36,7 +36,12 @@ export default class CText extends Component<CTextProps> {
         style={{...this.props.style}}
         activeOpacity={1}
         onPress={this.props.onPress}>
-        <Text style={{...this.styleHelper(), ...this.props.fontStyle}}>
+        <Text
+          style={{
+            ...styles.fontStyle,
+            ...this.styleHelper(),
+            ...this.props.fontStyle,
+          }}>
           {this.props.children}
         </Text>
         {this.props.mode === CTextMode.ActiveContentTab && (
@@ -58,6 +63,9 @@ export default class CText extends Component<CTextProps> {
 }
 
 const styles = StyleSheet.create({
+  fontStyle: {
+    fontSize: 13,
+  },
   headerStyle: {
     color: _COLORS.lightText,
     textTransform: 'uppercase',
