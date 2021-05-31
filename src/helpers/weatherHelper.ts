@@ -1,6 +1,7 @@
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import Config from 'react-native-config';
+import {IopenWeatherResponse} from '../interfaces/apiInterfaces';
 import moment from 'moment';
 import 'moment/locale/hu';
 moment.locale('hu')
@@ -25,7 +26,7 @@ export const getGeoLocation = (): Promise<geoLocationResult | false> => {
     })
 }
 
-export const getWeatherInfo = (latitude: number, longitude: number): Promise<object | false> => {
+export const getWeatherInfo = (latitude: number, longitude: number): Promise<IopenWeatherResponse | false> => {
   console.log('apikey: ', Config.OPENWEATHER_API_KEY)
     return new Promise((resolve)=> {
         axios

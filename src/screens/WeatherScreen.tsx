@@ -3,8 +3,6 @@ import {
   StyleSheet,
   View,
   Image,
-  TouchableOpacity,
-  Text,
   Dimensions,
   ActivityIndicator,
 } from 'react-native';
@@ -19,11 +17,22 @@ import {
 } from '../helpers/weatherHelper';
 import LinearGradient from 'react-native-linear-gradient';
 import {shadow} from '../resources/styles';
+import {
+  IopenWeatherHourly,
+  IopenWeatherResponse,
+} from '../interfaces/apiInterfaces';
+import {
+  iWeatherState,
+  iDailyForecast,
+  iHourlyForecast,
+} from '../interfaces/weatherInterfaces';
 import moment from 'moment';
 import 'moment/locale/hu';
 moment.locale('hu');
 
-enum SelectedView {
+const previousDay18h = moment().startOf('day').valueOf() / 1000 - 60 * 60 * 6;
+
+export enum SelectedView {
   Forecast,
   Precipitation,
 }
@@ -34,48 +43,52 @@ export default class WeatherScreen extends Component {
       if (result) {
         await getWeatherInfo(result.latitude, result.longitude).then(result => {
           //console.log('API result:', JSON.stringify(result, null, 2));
-          const lastSynced = dateTransformer(result.current.dt).time;
-          const city = result.timezone
-            .substr(result.timezone.indexOf('/') + 1, result.timezone.length)
-            .replace('_', ' ');
-          const currentTemp = `${Math.round(result.current.temp)}°`;
-          const currentFeelsLike = `${Math.round(result.current.feels_like)}°`;
-          const currentPrecipitation = `${result.hourly[0].pop}%`;
-          const hourlyForecast = [];
-          result.hourly.some((item, index) => {
-            hourlyForecast.push({
-              time: dateTransformer(item.dt).time,
-              temp: `${Math.round(item.temp)}°`,
-              pop: `${Math.round(item.pop)}%`,
-              icon: item.weather[0].icon,
-            });
-            if (index >= 5) return true;
-          });
-          const dailyForecast = [];
-          result.daily.some((item, index) => {
-            dailyForecast.push({
-              dayOfWeek: dateTransformer(item.dt).dayOfWeek,
-              date: dateTransformer(item.dt).dateShort,
-              max: `${Math.round(item.temp.max)}°`,
-              min: `${Math.round(item.temp.min)}°`,
-              rain: `${Math.round(item.rain || 0)}mm`,
-              icon: item.weather[0].icon,
-            });
-            if (index >= 3) return true;
-          });
-          this.setState({
-            city,
-            currentTemp,
-            currentFeelsLike,
-            currentPrecipitation,
-            hourlyForecast,
-            dailyForecast,
-            lastSynced,
-            refreshing: false,
-            loading: false,
-          });
+          if (result) return this.setResponse(result);
         });
       }
+    });
+  };
+
+  setResponse = (result: IopenWeatherResponse) => {
+    const lastSynced = dateTransformer(result.current.dt).time;
+    const city = result.timezone
+      .substr(result.timezone.indexOf('/') + 1, result.timezone.length)
+      .replace('_', ' ');
+    const currentTemp = `${Math.round(result.current.temp)}°`;
+    const currentFeelsLike = `${Math.round(result.current.feels_like)}°`;
+    const currentPrecipitation = `${result.hourly[0].pop}%`;
+    const hourlyForecast: iHourlyForecast[] = [];
+    result.hourly.some((item, index) => {
+      hourlyForecast.push({
+        time: dateTransformer(item.dt).time,
+        temp: `${Math.round(item.temp)}°`,
+        pop: `${Math.round(item.pop)}%`,
+        icon: item.weather[0].icon,
+      });
+      if (index >= 5) return true;
+    });
+    const dailyForecast: iDailyForecast[] = [];
+    result.daily.some((item, index) => {
+      dailyForecast.push({
+        dayOfWeek: dateTransformer(item.dt).dayOfWeek,
+        date: dateTransformer(item.dt).dateShort,
+        max: `${Math.round(item.temp.max)}°`,
+        min: `${Math.round(item.temp.min)}°`,
+        rain: `${Math.round(item.rain || 0)}mm`,
+        icon: item.weather[0].icon,
+      });
+      if (index >= 3) return true;
+    });
+    this.setState({
+      city,
+      currentTemp,
+      currentFeelsLike,
+      currentPrecipitation,
+      hourlyForecast,
+      dailyForecast,
+      lastSynced,
+      refreshing: false,
+      loading: false,
     });
   };
 
@@ -83,16 +96,16 @@ export default class WeatherScreen extends Component {
     await this.loadContent();
   }
 
-  state = {
+  state: iWeatherState = {
     selectedView: SelectedView.Forecast,
     city: '',
-    currentTemp: 0,
-    currentFeelsLike: 0,
-    currentPrecipitation: 0,
+    currentTemp: '',
+    currentFeelsLike: '',
+    currentPrecipitation: '',
     hourlyForecast: [],
     dailyForecast: [],
     lastSynced: '',
-    metHuAttrDate: moment().startOf('day').valueOf() / 1000 - 60 * 60 * 6,
+    metHuAttrDate: previousDay18h,
     refreshing: false,
     loading: true,
   };
@@ -140,123 +153,79 @@ export default class WeatherScreen extends Component {
         title={'Időjárás'}
         refreshing={this.state.refreshing}
         onRefresh={this.onRefresh}>
-        <View style={styles.tabRow}>
-          <View style={styles.tabGroup}>
-            <CText
-              mode={this.textModeHelper(SelectedView.Forecast)}
-              onPress={() => {
-                this.setState({selectedView: SelectedView.Forecast});
-              }}>
-              Előrejelzés
-            </CText>
-            <CText
-              mode={this.textModeHelper(SelectedView.Precipitation)}
-              onPress={() => {
-                this.setState({selectedView: SelectedView.Precipitation});
-              }}>
-              Csapadékösszeg
-            </CText>
-          </View>
-          <Icon mode={IconMode.Settings} color={_COLORS.darkText} size={20} />
-        </View>
+        {this.renderTabs()}
         {this.state.selectedView === SelectedView.Forecast &&
           !this.state.loading &&
-          this.renderForecast()}
+          this.renderCurrentWeatherBox()}
+        {this.state.selectedView === SelectedView.Forecast &&
+          !this.state.loading &&
+          this.renderHourlyForecastBox()}
         {this.state.selectedView === SelectedView.Precipitation &&
           !this.state.loading &&
-          this.renderPrecipitation()}
-        {this.state.loading && (
-          <View
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-            <View style={{flexDirection: 'row'}}>
-              <ActivityIndicator />
-              <CText style={{marginLeft: 5}}>Betöltés</CText>
-            </View>
-          </View>
-        )}
+          this.renderPrecipitationBox()}
+        {!this.state.loading && this.renderDailyForecastBox()}
+        {this.state.loading && this.renderLoadingMessage()}
       </ContentContainer>
     );
   }
-  private renderForecast = () => (
-    <>
-      <View style={styles.currentWeatherBox}>
-        <View
-          style={{
-            flex: 1,
-            alignItems: 'center',
-            justifyContent: 'space-between',
+  private renderTabs = () => (
+    <View style={styles.tabRow}>
+      <View style={styles.tabGroup}>
+        <CText
+          mode={this.textModeHelper(SelectedView.Forecast)}
+          onPress={() => {
+            this.setState({selectedView: SelectedView.Forecast});
           }}>
-          <CText style={{alignSelf: 'flex-start'}}>
-            {this.state.lastSynced}
+          Előrejelzés
+        </CText>
+        <CText
+          mode={this.textModeHelper(SelectedView.Precipitation)}
+          onPress={() => {
+            this.setState({selectedView: SelectedView.Precipitation});
+          }}>
+          Csapadékösszeg
+        </CText>
+      </View>
+      <Icon mode={IconMode.Settings} color={_COLORS.darkText} size={20} />
+    </View>
+  );
+  private renderCurrentWeatherBox = () => (
+    <View style={styles.currentWeatherBox}>
+      <View style={styles.currentWeatherSectionOne}>
+        <CText style={{alignSelf: 'flex-start'}}>{this.state.lastSynced}</CText>
+        <View style={styles.currentTempCircle}>
+          <CText style={{marginVertical: 5}} fontStyle={styles.currentTempText}>
+            {this.state.currentTemp}
           </CText>
-          <View
-            style={{
-              backgroundColor: '#5FBB64',
-              width: 65,
-              height: 65,
-              borderRadius: 65,
-              justifyContent: 'center',
-              alignItems: 'center',
-              ...shadow,
-              margin: 10,
-            }}>
-            <CText
-              style={{marginVertical: 5}}
-              fontStyle={{
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: 28,
-              }}>
-              {this.state.currentTemp}
-            </CText>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <Icon mode={IconMode.Location} size={18} color={'#5FBB64'} />
-            <CText style={{marginVertical: 5}} fontStyle={{fontWeight: 'bold'}}>
-              {this.state.city}
-            </CText>
-          </View>
         </View>
-        <View
-          style={{
-            height: 100,
-            width: 1,
-            borderWidth: 1,
-            borderColor: '#ddd',
-            borderStyle: 'dashed',
-          }}
-        />
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            paddingLeft: 18,
-          }}>
-          <CText fontStyle={{color: '#9FA6AA', marginBottom: 2}}>Hőérzet</CText>
-          <CText fontStyle={{fontWeight: 'bold', marginBottom: 10}}>
-            {this.state.currentFeelsLike}
-          </CText>
-          <CText fontStyle={{color: '#9FA6AA', marginBottom: 2}}>
-            Csapadék
-          </CText>
-          <CText fontStyle={{fontWeight: 'bold'}}>
-            {this.state.currentPrecipitation}
+        <View style={{flexDirection: 'row'}}>
+          <Icon mode={IconMode.Location} size={18} color={'#5FBB64'} />
+          <CText style={{marginVertical: 5}} fontStyle={{fontWeight: 'bold'}}>
+            {this.state.city}
           </CText>
         </View>
       </View>
+      <View style={styles.dashedDummyView} />
+      <View style={styles.currentWeatherSectionTwo}>
+        <CText fontStyle={styles.currentWeatherSecondaryText}>Hőérzet</CText>
+        <CText
+          fontStyle={{...styles.currentWeatherPrimaryText, marginBottom: 10}}>
+          {this.state.currentFeelsLike}
+        </CText>
+        <CText fontStyle={styles.currentWeatherSecondaryText}>Csapadék</CText>
+        <CText fontStyle={styles.currentWeatherPrimaryText}>
+          {this.state.currentPrecipitation}
+        </CText>
+      </View>
+    </View>
+  );
+  private renderHourlyForecastBox = () => (
+    <>
       <View style={styles.hourlyWeatherRow}>
         {this.state.hourlyForecast.map((hourly, index) => {
           return (
-            <View style={{...styles.hourlyItem}} key={index}>
-              <View
-                style={{
-                  flex: 1,
-                  backgroundColor: '#ffffff',
-                  width: '100%',
-                  alignItems: 'center',
-                  paddingTop: 10,
-                  paddingBottom: 20,
-                }}>
+            <View style={{...styles.hourlyBarContainer}} key={index}>
+              <View style={styles.hourlyBarTop}>
                 <CText>{hourly.time}</CText>
                 <Icon
                   mode={IconMode.Weather}
@@ -267,13 +236,7 @@ export default class WeatherScreen extends Component {
                 />
               </View>
               <LinearGradient
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  alignItems: 'center',
-                  paddingBottom: 10,
-                  paddingTop: 40,
-                }}
+                style={styles.hourlyBarBottom}
                 colors={['#ffffff', '#9DCD6C', '#60BE63']}>
                 <CText
                   fontStyle={{color: 'white', fontWeight: 'bold'}}
@@ -286,45 +249,25 @@ export default class WeatherScreen extends Component {
           );
         })}
       </View>
-      {this.renderForecastBox()}
     </>
   );
-  private renderPrecipitation = () => (
-    <>
-      {this.renderPrecipitationImage()}
-      {this.renderForecastBox()}
-    </>
-  );
-  private renderForecastBox = () => (
+  private renderPrecipitationBox = () => <>{this.renderPrecipitationImage()}</>;
+  private renderDailyForecastBox = () => (
     <LinearGradient
-      style={styles.forecastWeatherBox}
+      style={styles.dailyForecastBox}
       colors={['#374472', '#222442']}>
       {this.state.dailyForecast.map((daily, index) => {
         return (
-          <View style={styles.forecastWeatherItem} key={index}>
+          <View style={styles.dailyForecastItem} key={index}>
             <View>
-              <CText
-                fontStyle={{
-                  fontWeight: 'bold',
-                  textTransform: 'capitalize',
-                  marginBottom: 3,
-                  fontSize: 15,
-                }}>
+              <CText fontStyle={styles.dailyForecastDayText}>
                 {daily.dayOfWeek}
               </CText>
-              <CText
-                fontStyle={{
-                  textTransform: 'uppercase',
-                  color: _COLORS.secondaryText,
-                }}>
+              <CText fontStyle={styles.dailyForecastDateText}>
                 {daily.date}
               </CText>
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+            <View style={styles.dailyForecastSectionTwo}>
               <Icon
                 mode={IconMode.Weather}
                 iconName={daily.icon}
@@ -356,30 +299,13 @@ export default class WeatherScreen extends Component {
             dateTransformer(this.state.metHuAttrDate).metHuAttr
           }.png`,
         }}
-        style={{
-          width: Dimensions.get('screen').width,
-          height: 300,
-          alignSelf: 'center',
-        }}
+        style={styles.precipitationImg}
         resizeMode="contain"
       />
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          paddingVertical: 15,
-          paddingHorizontal: 10,
-        }}>
+      <View style={styles.precipitationNavRow}>
         <LinearGradient
           colors={['#5FBC64', '#8CC75E']}
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 50,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+          style={styles.precipitationButton}>
           <Icon
             mode={IconMode.Arrow}
             size={30}
@@ -394,13 +320,7 @@ export default class WeatherScreen extends Component {
         </View>
         <LinearGradient
           colors={['#5FBC64', '#8CC75E']}
-          style={{
-            width: 50,
-            height: 50,
-            borderRadius: 50,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
+          style={styles.precipitationButton}>
           <Icon
             mode={IconMode.Arrow}
             size={30}
@@ -411,6 +331,18 @@ export default class WeatherScreen extends Component {
         </LinearGradient>
       </View>
     </>
+  );
+  private renderLoadingMessage = () => (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={{flexDirection: 'row'}}>
+        <ActivityIndicator />
+        <CText
+          style={{marginLeft: 5}}
+          fontStyle={{color: _COLORS.secondaryText}}>
+          Betöltés
+        </CText>
+      </View>
+    </View>
   );
 }
 
@@ -436,12 +368,46 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     ...shadow,
   },
+  currentWeatherSectionOne: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  currentTempCircle: {
+    backgroundColor: '#5FBB64',
+    width: 65,
+    height: 65,
+    borderRadius: 65,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...shadow,
+    margin: 10,
+  },
+  currentTempText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 28,
+  },
+  dashedDummyView: {
+    height: 100,
+    width: 1,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderStyle: 'dashed',
+  },
+  currentWeatherSectionTwo: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingLeft: 18,
+  },
+  currentWeatherSecondaryText: {color: '#9FA6AA', marginBottom: 2},
+  currentWeatherPrimaryText: {fontWeight: 'bold'},
   hourlyWeatherRow: {
     flexDirection: 'row',
     marginHorizontal: -5,
     marginVertical: 15,
   },
-  hourlyItem: {
+  hourlyBarContainer: {
     flex: 1,
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -451,14 +417,29 @@ const styles = StyleSheet.create({
     borderWidth: 5,
     ...shadow,
   },
-  forecastWeatherBox: {
+  hourlyBarTop: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    width: '100%',
+    alignItems: 'center',
+    paddingTop: 10,
+    paddingBottom: 20,
+  },
+  hourlyBarBottom: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    paddingBottom: 10,
+    paddingTop: 40,
+  },
+  dailyForecastBox: {
     flexDirection: 'column',
     backgroundColor: 'darkblue',
     alignItems: 'center',
     paddingVertical: 15,
     marginHorizontal: -20,
   },
-  forecastWeatherItem: {
+  dailyForecastItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingHorizontal: 10,
@@ -468,8 +449,41 @@ const styles = StyleSheet.create({
     backgroundColor: _COLORS.containerBackground,
     borderRadius: 5,
   },
+  dailyForecastDayText: {
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+    marginBottom: 3,
+    fontSize: 15,
+  },
+  dailyForecastDateText: {
+    textTransform: 'uppercase',
+    color: _COLORS.secondaryText,
+  },
+  dailyForecastSectionTwo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   dailyForecastData: {
     marginLeft: 18,
     fontWeight: 'bold',
+  },
+  precipitationImg: {
+    width: Dimensions.get('screen').width,
+    height: 300,
+    alignSelf: 'center',
+  },
+  precipitationNavRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+  },
+  precipitationButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

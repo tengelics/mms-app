@@ -49,6 +49,7 @@ interface IconProps {
   iconName?: string;
   iconStyle?: {};
   containerStyle?: {};
+  style?: {};
 }
 
 export default class Icon extends Component<IconProps> {
@@ -125,7 +126,7 @@ export default class Icon extends Component<IconProps> {
     else if (this.props.mode === IconMode.Weather) this.IconName = Weather;
   };
 
-  constructor(props) {
+  constructor(props: IconProps) {
     super(props);
     this.iconSwitch();
   }
