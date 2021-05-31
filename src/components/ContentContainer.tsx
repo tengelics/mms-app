@@ -3,6 +3,7 @@ import {View, ScrollView, StyleSheet, RefreshControl} from 'react-native';
 import {_COLORS} from '../resources/colors';
 import CText, {CTextMode} from '../components/CText';
 import Icon, {IconMode} from '../components/Icon';
+import {shadow} from '../resources/styles';
 
 const borderRadius = 18;
 
@@ -64,5 +65,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: borderRadius,
     borderTopRightRadius: borderRadius,
     paddingHorizontal: 18,
+    ...shadow,
   },
 });

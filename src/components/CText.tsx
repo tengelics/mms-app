@@ -25,8 +25,6 @@ export default class CText extends Component<CTextProps> {
         return {...styles.activeContentTabStyle};
       case CTextMode.InactiveContentTab:
         return {...styles.inactiveContentTabStyle};
-      default:
-        return {...this.props.style};
     }
   };
   render() {
@@ -63,11 +61,11 @@ const styles = StyleSheet.create({
   activeContentTabStyle: {
     color: _COLORS.darkText,
     fontWeight: 'bold',
-    padding: 8,
+    padding: 10,
   },
   inactiveContentTabStyle: {
     color: _COLORS.secondaryText,
     fontWeight: 'bold',
-    padding: 8,
+    padding: 10,
   },
 });

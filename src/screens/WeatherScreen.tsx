@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import ContentContainer from '../components/ContentContainer';
 import CText, {CTextMode} from '../components/CText';
@@ -17,6 +18,7 @@ import {
   dateTransformer,
 } from '../helpers/weatherHelper';
 import LinearGradient from 'react-native-linear-gradient';
+import {shadow} from '../resources/styles';
 import moment from 'moment';
 import 'moment/locale/hu';
 moment.locale('hu');
@@ -70,6 +72,7 @@ export default class WeatherScreen extends Component {
             dailyForecast,
             lastSynced,
             refreshing: false,
+            loading: false,
           });
         });
       }
@@ -91,6 +94,7 @@ export default class WeatherScreen extends Component {
     lastSynced: '',
     metHuAttrDate: moment().startOf('day').valueOf() / 1000 - 60 * 60 * 6,
     refreshing: false,
+    loading: true,
   };
 
   textModeHelper = (mode: SelectedView) => {
@@ -156,9 +160,20 @@ export default class WeatherScreen extends Component {
           <Icon mode={IconMode.Settings} color={_COLORS.darkText} size={20} />
         </View>
         {this.state.selectedView === SelectedView.Forecast &&
+          !this.state.loading &&
           this.renderForecast()}
         {this.state.selectedView === SelectedView.Precipitation &&
+          !this.state.loading &&
           this.renderPrecipitation()}
+        {this.state.loading && (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <View style={{flexDirection: 'row'}}>
+              <ActivityIndicator />
+              <CText style={{marginLeft: 5}}>Betöltés</CText>
+            </View>
+          </View>
+        )}
       </ContentContainer>
     );
   }
@@ -183,6 +198,7 @@ export default class WeatherScreen extends Component {
               justifyContent: 'center',
               alignItems: 'center',
               ...shadow,
+              margin: 10,
             }}>
             <CText
               style={{marginVertical: 5}}
@@ -292,10 +308,15 @@ export default class WeatherScreen extends Component {
                   fontWeight: 'bold',
                   textTransform: 'capitalize',
                   marginBottom: 3,
+                  fontSize: 15,
                 }}>
                 {daily.dayOfWeek}
               </CText>
-              <CText fontStyle={{textTransform: 'uppercase'}}>
+              <CText
+                fontStyle={{
+                  textTransform: 'uppercase',
+                  color: _COLORS.secondaryText,
+                }}>
                 {daily.date}
               </CText>
             </View>
@@ -310,12 +331,16 @@ export default class WeatherScreen extends Component {
                 size={20}
                 color={'#5FBB64'}
               />
-              <CText style={{...styles.dailyForecastData}}>{daily.max}</CText>
-              <CText style={{...styles.dailyForecastData, color: '#EF8433'}}>
-                {daily.min}
-              </CText>
-              <CText style={{...styles.dailyForecastData, color: '#3188CB'}}>
+              <CText fontStyle={{...styles.dailyForecastData}}>
                 {daily.rain}
+              </CText>
+              <CText
+                fontStyle={{...styles.dailyForecastData, color: '#EF8433'}}>
+                {daily.max}
+              </CText>
+              <CText
+                fontStyle={{...styles.dailyForecastData, color: '#3188CB'}}>
+                {daily.min}
               </CText>
             </View>
           </View>
@@ -378,7 +403,7 @@ export default class WeatherScreen extends Component {
           }}>
           <Icon
             mode={IconMode.Arrow}
-            size={40}
+            size={30}
             color={_COLORS.containerBackground}
             onPress={this.metHuDateIncrease}
             containerStyle={{margin: 10, transform: [{rotateY: '180deg'}]}}
@@ -388,17 +413,6 @@ export default class WeatherScreen extends Component {
     </>
   );
 }
-
-const shadow = {
-  shadowColor: '#adb5bd',
-  shadowOffset: {
-    width: 0,
-    height: 6,
-  },
-  shadowOpacity: 0.55,
-  shadowRadius: 8,
-  elevation: 2,
-};
 
 const styles = StyleSheet.create({
   tabRow: {
@@ -455,7 +469,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dailyForecastData: {
-    marginLeft: 7,
+    marginLeft: 18,
     fontWeight: 'bold',
   },
 });

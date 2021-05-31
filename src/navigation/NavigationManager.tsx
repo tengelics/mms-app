@@ -8,6 +8,7 @@ import CurrencyScreen from '../screens/CurrencyScreen';
 import WeatherScreen from '../screens/WeatherScreen';
 import NewsScreen from '../screens/NewsScreen';
 import Icon, {IconMode} from '../components/Icon';
+import {shadow} from '../resources/styles';
 const Tab = createBottomTabNavigator();
 const iconModes = [
   IconMode.Produce,
@@ -23,6 +24,13 @@ function MyTabBar({state, descriptors, navigation}) {
         flexDirection: 'row',
         backgroundColor: _COLORS.containerBackground,
         elevation: 10,
+        shadowColor: 'black',
+        shadowOffset: {
+          width: 0,
+          height: 1,
+        },
+        shadowOpacity: 0.55,
+        shadowRadius: 5,
       }}>
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
@@ -83,7 +91,9 @@ export default class NavigationManager extends Component {
   render() {
     return (
       <NavigationContainer>
-        <Tab.Navigator tabBar={props => <MyTabBar {...props} />}>
+        <Tab.Navigator
+          tabBar={props => <MyTabBar {...props} />}
+          initialRouteName={'Időjárás'}>
           <Tab.Screen name="Termény" component={ProduceScreen} />
           <Tab.Screen name="Deviza" component={CurrencyScreen} />
           <Tab.Screen name="Időjárás" component={WeatherScreen} />
