@@ -1,5 +1,6 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+pod 'react-native-config', :path => '../node_modules/react-native-config'
 
 platform :ios, '10.0'
 
@@ -11,6 +12,8 @@ target 'mms_app' do
     # to enable hermes on iOS, change `false` to `true` and then install pods
     :hermes_enabled => false
   )
+
+  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
 
   target 'mms_appTests' do
     inherit! :complete
