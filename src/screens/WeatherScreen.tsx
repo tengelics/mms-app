@@ -76,13 +76,13 @@ export default class WeatherScreen extends Component {
       .replace('_', ' ');
     const currentTemp = `${Math.round(result.current.temp)}°`;
     const currentFeelsLike = `${Math.round(result.current.feels_like)}°`;
-    const currentPrecipitation = `${result.hourly[0].pop}%`;
+    const currentPrecipitation = `${result.hourly[0].pop * 100}%`;
     const hourlyForecast: iHourlyForecast[] = [];
     result.hourly.some((item, index) => {
       hourlyForecast.push({
         time: dateTransformer(item.dt).time,
         temp: `${Math.round(item.temp)}°`,
-        pop: `${Math.round(item.pop)}%`,
+        pop: `${Math.round(item.pop * 100)}%`,
         icon: item.weather[0].icon,
       });
       if (index >= 5) return true;
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
   dailyForecastBox: {
     backgroundColor: 'darkblue',
     alignItems: 'center',
-    paddingVertical: 15,
+    paddingVertical: 7.5,
     marginHorizontal: -_DIMENSIONS.contentHorizontalPadding,
   },
   dailyForecastItem: {
@@ -454,7 +454,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     width: '90%',
-    marginBottom: 15,
+    marginVertical: 7.5,
     backgroundColor: _COLORS.containerBackground,
     borderRadius: 5,
   },
@@ -473,8 +473,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   dailyForecastData: {
-    marginLeft: 18,
+    marginLeft: 12,
+    width: 40,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   precipitationImg: {
     width: Dimensions.get('screen').width,

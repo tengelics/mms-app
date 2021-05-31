@@ -27,7 +27,6 @@ export const getGeoLocation = (): Promise<geoLocationResult | false> => {
 }
 
 export const getWeatherInfo = (latitude: number, longitude: number): Promise<IopenWeatherResponse | false> => {
-  console.log('apikey: ', Config.OPENWEATHER_API_KEY)
     return new Promise((resolve)=> {
         axios
         .post(
